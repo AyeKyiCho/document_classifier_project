@@ -1,8 +1,10 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import time
 import re
+
+# Import only the specific transformers components you need
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # -----------------------------
 # Page Configuration
@@ -70,7 +72,11 @@ def load_model():
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
     return tokenizer, model
 
-tokenizer, model = load_model()
+try:
+    tokenizer, model = load_model()
+except Exception as e:
+    st.error(f"Error loading model: {e}")
+    st.stop()
 
 # Document categories with keywords
 CATEGORIES = {
@@ -79,7 +85,7 @@ CATEGORIES = {
                     "subject", "reply", "forward", "cc", "bcc", "attachment", "greetings", "best regards", "kind regards"],
         "icon": "📧",
         "color": "#2196F3",
-        "threshold": 3  # Minimum matches needed
+        "threshold": 3
     },
     "📄 Invoice": {
         "keywords": ["invoice", "payment", "amount", "due", "total", "balance", "receipt", "billing", "purchase", "order",
@@ -124,7 +130,7 @@ CATEGORIES = {
 def classify_document(text):
     """Classify document using keyword matching with threshold and fallback"""
     text_lower = text.lower()
-    text_words = set(text_lower.split())  # For additional analysis
+    text_words = set(text_lower.split())
     
     # Detect if it's code
     code_patterns = re.findall(r'\b(import|def|class|function|return|print|if|else|for|while|try|except)\b', text_lower)
@@ -132,7 +138,7 @@ def classify_document(text):
     
     scores = {}
     matched_keywords = {}
-    unique_matches = {}  # Track unique keywords matched
+    unique_matches = {}
     
     # Calculate scores for each category
     for category, info in CATEGORIES.items():
@@ -147,10 +153,8 @@ def classify_document(text):
                 matches.append(keyword)
                 unique_count += 1
         
-        # Store unique matches count
         unique_matches[category] = unique_count
         
-        # Boost score if multiple matches from same category
         if len(matches) > 2:
             score *= 1.5
         
@@ -180,11 +184,11 @@ def classify_document(text):
     
     # Condition 2: Total score too low relative to document length
     word_count = len(text_words)
-    if word_count > 20 and max_score / word_count < 0.05:  # Less than 5% of words match
+    if word_count > 20 and max_score / word_count < 0.05:
         is_other = True
         other_reason = f"Very few keyword matches ({max_score} matches in {word_count} words)"
     
-    # Condition 3: Multiple categories have similar scores (ambiguous)
+    # Condition 3: Multiple categories have similar scores
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     if len(sorted_scores) >= 2:
         top_score = sorted_scores[0][1]
@@ -202,32 +206,33 @@ def classify_document(text):
     total_scores = sum(scores.values())
     confidence = (max_score / total_scores) if total_scores > 0 else 0
     
-    # If no keywords found at all, use sentiment analysis
+    # If no keywords found, use sentiment analysis
     if max_score == 0:
-        inputs = tokenizer(text[:512], return_tensors="pt", truncation=True, padding=True)
-        with torch.no_grad():
-            outputs = model(**inputs)
-            logits = outputs.logits
-            predicted_class = torch.argmax(logits).item()
-            probabilities = torch.softmax(logits, dim=1)
-            confidence = probabilities[0][predicted_class].item()
-            confidence = min(confidence, 0.4)  # Reduce confidence for sentiment fallback
-        
-        # Map sentiment to categories with low confidence
-        if predicted_class == 1:  # Positive
-            predicted_label = "📄 Invoice"
-        else:  # Negative
-            predicted_label = "📧 Email"
-        
-        # Mark as other if confidence is too low
-        if confidence < 0.3:
+        try:
+            inputs = tokenizer(text[:512], return_tensors="pt", truncation=True, padding=True)
+            with torch.no_grad():
+                outputs = model(**inputs)
+                logits = outputs.logits
+                predicted_class = torch.argmax(logits).item()
+                probabilities = torch.softmax(logits, dim=1)
+                confidence = probabilities[0][predicted_class].item()
+                confidence = min(confidence, 0.4)
+            
+            if predicted_class == 1:
+                predicted_label = "📄 Invoice"
+            else:
+                predicted_label = "📧 Email"
+            
+            if confidence < 0.3:
+                is_other = True
+                other_reason = "Low confidence sentiment analysis fallback"
+        except Exception as e:
             is_other = True
-            other_reason = "Low confidence sentiment analysis fallback"
+            other_reason = f"Error in sentiment analysis: {str(e)[:50]}"
     
-    # If marked as other, change label
     if is_other:
         predicted_label = "❓ Other / Unknown"
-        confidence = max(confidence, 0.1)  # Ensure some visibility
+        confidence = max(confidence, 0.1)
     
     return predicted_label, confidence, scores, matched_keywords, is_other, other_reason
 
@@ -291,7 +296,6 @@ if uploaded_file:
         # Display result with appropriate styling
         st.subheader("🎯 Classification Result")
         
-        # Choose result box style
         if is_other:
             box_class = "result-other"
             emoji = "🤔"
@@ -317,10 +321,8 @@ if uploaded_file:
         
         # Detailed analysis
         with st.expander("📊 Detailed Analysis", expanded=True):
-            # Show scores for all categories
             st.write("**Category Scores:**")
             
-            # Sort categories by score
             sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
             
             for category, score in sorted_scores:
@@ -335,7 +337,6 @@ if uploaded_file:
                 st.warning(f"⚠️ **Document classified as 'Other'**")
                 st.info(f"Reason: {other_reason}")
             
-            # Show matched keywords
             st.write("**Keywords Found:**")
             found_any = False
             for category, keywords in matched_keywords.items():
@@ -346,23 +347,19 @@ if uploaded_file:
             if not found_any:
                 st.write("No keywords matched")
             
-            # Show detected code patterns
             code_patterns = re.findall(r'\b(import|def|class|function|return|print|if|else|for|while|try|except)\b', text.lower())
             if code_patterns:
                 st.info(f"💻 **Code detected!** Found these patterns: {', '.join(set(code_patterns[:10]))}")
             
-            # Show document statistics
             st.write("**Document Statistics:**")
             words = text.split()
             st.write(f"- Total words: {len(words)}")
             st.write(f"- Unique words: {len(set(words))}")
             st.write(f"- Average word length: {sum(len(w) for w in words) / len(words) if words else 0:.1f} characters")
 else:
-    # Empty state
     st.info("👆 Upload a .txt file to begin classification")
     st.caption("Supported categories: Email, Invoice, Report, Resume, Contract, Code")
     st.caption("Documents that don't match any category will be marked as 'Other'")
 
-# Footer
 st.divider()
 st.caption("Built with 🤗 Transformers • Powered by DistilBERT")
