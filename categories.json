@@ -1,0 +1,65 @@
+{
+  "Email": {
+    "keywords": [
+      "dear", "hello", "hi", "regards", "sincerely", "thanks", "thank you", 
+      "email", "sent", "received", "subject", "reply", "forward", "cc", 
+      "bcc", "attachment", "greetings", "best regards", "kind regards"
+    ],
+    "icon": "📧",
+    "color": "#2196F3",
+    "threshold": 3
+  },
+  "Invoice": {
+    "keywords": [
+      "invoice", "payment", "amount", "due", "total", "balance", "receipt", 
+      "billing", "purchase", "order", "subtotal", "tax", "discount", 
+      "price", "cost", "paid", "outstanding", "statement", "transaction"
+    ],
+    "icon": "📄",
+    "color": "#FF9800",
+    "threshold": 3
+  },
+  "Report": {
+    "keywords": [
+      "report", "analysis", "summary", "findings", "results", "data", 
+      "conclusion", "recommendation", "performance", "metrics", "kpi", 
+      "dashboard", "trend", "forecast", "evaluation", "assessment"
+    ],
+    "icon": "📋",
+    "color": "#9C27B0",
+    "threshold": 3
+  },
+  "Resume": {
+    "keywords": [
+      "experience", "skills", "education", "job", "work", "career", 
+      "position", "accomplishments", "professional", "certification", 
+      "degree", "university", "employment", "responsibilities", 
+      "achievements", "references", "objective", "summary", "qualifications"
+    ],
+    "icon": "📝",
+    "color": "#4CAF50",
+    "threshold": 3
+  },
+  "Contract": {
+    "keywords": [
+      "agreement", "terms", "conditions", "party", "clause", "effective", 
+      "signature", "legal", "obligation", "liability", "indemnify", 
+      "warranty", "termination", "confidential", "governing", 
+      "jurisdiction", "arbitration", "force majeure", "non-disclosure"
+    ],
+    "icon": "📑",
+    "color": "#F44336",
+    "threshold": 3
+  },
+  "Code": {
+    "keywords": [
+      "import", "def", "class", "function", "return", "print", "if", 
+      "else", "for", "while", "try", "except", "with", "as", "from", 
+      "lambda", "async", "await", "yield", "global", "nonlocal", 
+      "assert", "pass", "break", "continue", "raise", "self", "super"
+    ],
+    "icon": "💻",
+    "color": "#607D8B",
+    "threshold": 3
+  }
+}
