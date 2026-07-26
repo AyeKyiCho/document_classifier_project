@@ -4,8 +4,8 @@ import time
 import re
 import json
 import os
-import pdfplumber
 
+# Import only the specific transformers components you need
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # -----------------------------
@@ -21,6 +21,7 @@ st.set_page_config(
 # Load Custom CSS
 # -----------------------------
 def load_css():
+    """Load custom CSS from file"""
     css_path = os.path.join(os.path.dirname(__file__), "styles.css")
     
     try:
@@ -28,6 +29,7 @@ def load_css():
             css = f.read()
         st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
+        # Fallback to minimal styling if CSS file not found
         st.markdown("""
             <style>
             .main { padding: 2rem; }
@@ -70,17 +72,11 @@ def load_css():
                 overflow-y: auto;
                 font-family: monospace;
             }
-            .debug-box {
-                background-color: #fff3cd;
-                padding: 1rem;
-                border-radius: 8px;
-                margin: 1rem 0;
-                border: 1px solid #ffc107;
-            }
             </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ styles.css not found. Using fallback styling.")
 
+# Load CSS
 load_css()
 
 # -----------------------------
@@ -88,26 +84,26 @@ load_css()
 # -----------------------------
 @st.cache_resource
 def load_categories():
+    """Load categories from JSON file"""
     json_path = os.path.join(os.path.dirname(__file__), "categories.json")
     
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             categories = json.load(f)
-        
-        # REMOVE CODE CATEGORY if it exists
-        if "Code" in categories:
-            del categories["Code"]
-            st.info("ℹ️ 'Code' category removed from classification")
-        
         return categories
-    except Exception as e:
-        st.error(f"Error loading categories.json: {e}")
+    except FileNotFoundError:
+        st.error(f"Categories file not found at: {json_path}")
+        st.info("Please create a 'categories.json' file in the same directory as app.py")
+        return {}
+    except json.JSONDecodeError as e:
+        st.error(f"Error parsing categories.json: {e}")
         return {}
 
+# Load categories
 CATEGORIES = load_categories()
 
 # -----------------------------
-# Load Pretrained NLP Model
+# Load Pretrained NLP Model (cached)
 # -----------------------------
 @st.cache_resource
 def load_model():
@@ -116,30 +112,35 @@ def load_model():
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
     return tokenizer, model
 
-tokenizer, model = load_model()
+try:
+    tokenizer, model = load_model()
+except Exception as e:
+    st.error(f"Error loading model: {e}")
+    st.stop()
 
+# Stop if no categories loaded
 if not CATEGORIES:
     st.error("No categories loaded. Please check categories.json file.")
     st.stop()
 
-# -----------------------------
-# Classification Logic
-# -----------------------------
-def classify_document(text, slider_threshold, debug=False):
+def classify_document(text):
+    """Classify document using keyword matching with threshold and fallback"""
     text_lower = text.lower()
     text_words = set(text_lower.split())
+    
+    # Detect if it's code
+    code_patterns = re.findall(r'\b(import|def|class|function|return|print|if|else|for|while|try|except)\b', text_lower)
+    has_code = len(code_patterns) > 5
     
     scores = {}
     matched_keywords = {}
     unique_matches = {}
-    all_matches = {}
     
-    # Keyword scoring
+    # Calculate scores for each category
     for category, info in CATEGORIES.items():
         score = 0
         matches = []
         unique_count = 0
-        category_matches = {}
         
         for keyword in info["keywords"]:
             count = text_lower.count(keyword)
@@ -147,7 +148,6 @@ def classify_document(text, slider_threshold, debug=False):
                 score += count
                 matches.append(keyword)
                 unique_count += 1
-                category_matches[keyword] = count
         
         unique_matches[category] = unique_count
         
@@ -156,43 +156,53 @@ def classify_document(text, slider_threshold, debug=False):
         
         scores[category] = score
         matched_keywords[category] = matches
-        all_matches[category] = category_matches
     
-    # Best category
+    # Code detection override
+    if has_code and "Code" in CATEGORIES and scores.get("Code", 0) > 0:
+        scores["Code"] *= 2
+    
+    # Get best category
     predicted_label = max(scores, key=scores.get)
     max_score = scores[predicted_label]
     max_unique = unique_matches[predicted_label]
     
-    threshold = slider_threshold
+    # Get threshold for best category
+    threshold = CATEGORIES.get(predicted_label, {}).get("threshold", 3)
     
-    # Determine "Other"
+    # Check if document is "Other"
     is_other = False
     other_reason = ""
     
-    word_count = len(text_words)
-    
+    # Condition 1: Not enough unique keyword matches
     if max_unique < threshold:
         is_other = True
         other_reason = f"Only {max_unique} unique keyword matches found (need {threshold})"
     
+    # Condition 2: Total score too low relative to document length
+    word_count = len(text_words)
     if word_count > 20 and max_score / word_count < 0.05:
         is_other = True
         other_reason = f"Very few keyword matches ({max_score} matches in {word_count} words)"
     
+    # Condition 3: Multiple categories have similar scores
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     if len(sorted_scores) >= 2:
-        if sorted_scores[1][1] / sorted_scores[0][1] > 0.7:
+        top_score = sorted_scores[0][1]
+        second_score = sorted_scores[1][1]
+        if top_score > 0 and second_score > 0 and (second_score / top_score) > 0.7:
             is_other = True
-            other_reason = f"Ambiguous - similar scores: {sorted_scores[0][0]} vs {sorted_scores[1][0]}"
+            other_reason = f"Ambiguous - similar scores: {sorted_scores[0][0]} ({top_score}) vs {sorted_scores[1][0]} ({second_score})"
     
+    # Condition 4: Document is too short
     if word_count < 10:
         is_other = True
-        other_reason = "Document too short"
+        other_reason = "Document too short for reliable classification"
     
+    # Calculate confidence
     total_scores = sum(scores.values())
-    confidence = max_score / total_scores if total_scores > 0 else 0
+    confidence = (max_score / total_scores) if total_scores > 0 else 0
     
-    # Sentiment fallback
+    # If no keywords found, use sentiment analysis
     if max_score == 0:
         try:
             inputs = tokenizer(text[:512], return_tensors="pt", truncation=True, padding=True)
@@ -201,33 +211,32 @@ def classify_document(text, slider_threshold, debug=False):
                 logits = outputs.logits
                 predicted_class = torch.argmax(logits).item()
                 probabilities = torch.softmax(logits, dim=1)
-                confidence = float(probabilities[0][predicted_class])
+                confidence = probabilities[0][predicted_class].item()
                 confidence = min(confidence, 0.4)
             
-            predicted_label = "Invoice" if predicted_class == 1 else "Email"
+            if predicted_class == 1:
+                predicted_label = "Invoice"
+            else:
+                predicted_label = "Email"
             
             if confidence < 0.3:
                 is_other = True
-                other_reason = "Low confidence sentiment fallback"
-        
+                other_reason = "Low confidence sentiment analysis fallback"
         except Exception as e:
             is_other = True
-            other_reason = f"Sentiment error: {str(e)[:50]}"
+            other_reason = f"Error in sentiment analysis: {str(e)[:50]}"
     
     if is_other:
         predicted_label = "Other / Unknown"
         confidence = max(confidence, 0.1)
     
-    # Add icon
+    # Add icon to predicted label if it exists in categories
     if predicted_label in CATEGORIES:
         icon = CATEGORIES[predicted_label].get("icon", "")
         if icon:
             predicted_label = f"{icon} {predicted_label}"
-    else:
+    elif predicted_label == "Other / Unknown":
         predicted_label = "❓ Other / Unknown"
-    
-    if debug:
-        return predicted_label, confidence, scores, matched_keywords, is_other, other_reason, all_matches
     
     return predicted_label, confidence, scores, matched_keywords, is_other, other_reason
 
@@ -235,161 +244,149 @@ def classify_document(text, slider_threshold, debug=False):
 # Streamlit UI
 # -----------------------------
 st.title("📄 Intelligent Document Classifier")
-st.markdown("### Upload a text or PDF file and get instant AI classification")
+st.markdown("### Upload a text file and get instant AI classification")
 
 # Sidebar with settings
 with st.sidebar:
     st.header("⚙️ Settings")
-    
-    slider_threshold = st.slider(
+    threshold = st.slider(
         "Minimum keyword matches required",
         min_value=1,
         max_value=10,
-        value=2,
+        value=3,
         help="Higher values make classification more strict"
     )
-    
-    debug_mode = st.checkbox(
-        "🐞 Debug Mode",
-        value=False,
-        help="Show detailed keyword matching information"
-    )
+    st.caption("Documents below threshold will be marked as 'Other'")
     
     st.divider()
     st.header("Supported Types")
+    # Display categories from JSON
     for category, info in CATEGORIES.items():
         st.write(f"{info.get('icon', '📄')} {category}")
     
     st.divider()
     with st.expander("ℹ️ How it works"):
         st.write("""
-        1. Upload a .txt or .pdf file  
-        2. The app analyzes keywords in your document  
-        3. Each category gets a score based on keyword matches  
-        4. The category with the highest score is selected  
-        5. If the score is too low, it's marked as 'Other'  
+        1. Upload a .txt file
+        2. The app analyzes keywords in your document
+        3. Each category gets a score based on keyword matches
+        4. The category with the highest score is selected
+        5. If the score is too low, it's marked as 'Other'
         """)
     
     st.divider()
-    st.caption("Version 2.4 • Code Category Removed")
+    st.caption("Version 2.0")
 
-# -----------------------------
-# File Upload (TXT + PDF)
-# -----------------------------
-uploaded_file = st.file_uploader(
-    "**Drop your .txt or .pdf file here**",
-    type=["txt", "pdf"],
-    help="Supports .txt and .pdf files up to 5MB"
-)
+# Create upload section
+with st.container():
+   
+    uploaded_file = st.file_uploader(
+        "**Drop your .txt file here** or click to browse",
+        type=["txt"],
+        help="Supports .txt files up to 5MB"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# -----------------------------
-# File Processing
-# -----------------------------
 if uploaded_file:
     with st.spinner("Processing document..."):
-        
-        # TXT
-        if uploaded_file.type == "text/plain":
-            text = uploaded_file.read().decode("utf-8")
-        
-        # PDF
-        elif uploaded_file.type == "application/pdf":
-            text = ""
-            with pdfplumber.open(uploaded_file) as pdf:
-                for page in pdf.pages:
-                    extracted = page.extract_text()
-                    if extracted:
-                        text += extracted + "\n"
-            
-            if not text.strip():
-                st.error("❌ Could not extract text from this PDF. It may be scanned.")
-                st.stop()
-        
-        else:
-            st.error("Unsupported file type.")
-            st.stop()
-        
+        text = uploaded_file.read().decode("utf-8")
         time.sleep(0.3)
     
-    # File Info
+    # File info with improved styling
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("📁 File Name", uploaded_file.name)
+        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+        st.metric("📁 File Name", uploaded_file.name[:20] + "..." if len(uploaded_file.name) > 20 else uploaded_file.name)
+        st.markdown('</div>', unsafe_allow_html=True)
     with col2:
+        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
         st.metric("📏 Size", f"{len(text):,} chars")
+        st.markdown('</div>', unsafe_allow_html=True)
     with col3:
+        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
         st.metric("📝 Words", len(text.split()))
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Preview
+    # Document preview
     st.subheader("📖 Document Preview")
     preview_text = text[:500] + ("..." if len(text) > 500 else "")
     st.markdown(f'<div class="preview-box">{preview_text}</div>', unsafe_allow_html=True)
     
-    # Classification Button
+    # Classification button
     if st.button("🔍 Classify Document", use_container_width=True):
-        if debug_mode:
-            predicted_label, confidence, scores, matched_keywords, is_other, other_reason, all_matches = classify_document(
-                text, slider_threshold, debug=True
-            )
-        else:
-            predicted_label, confidence, scores, matched_keywords, is_other, other_reason = classify_document(
-                text, slider_threshold
-            )
+        with st.spinner("AI is analyzing..."):
+            predicted_label, confidence, scores, matched_keywords, is_other, other_reason = classify_document(text)
         
+        # Display result with appropriate styling
         st.subheader("Classification Result")
         
-        box_class = "result-other" if is_other else ("result-success" if confidence > 0.7 else "result-warning")
-        
+        if is_other:
+            box_class = "result-other"           
+        elif confidence > 0.7:
+            box_class = "result-success"           
+        else:
+            box_class = "result-warning"
+            
         st.markdown(f'''
             <div class="result-box {box_class}">
-                <h2>{predicted_label}</h2>
-                <p>Confidence: {confidence:.1%}</p>
-                {f"<p>💡 {other_reason}</p>" if is_other else ""}
+                <h2 style="margin:0;">{predicted_label}</h2>
+                <p style="margin:0.5rem 0 0 0; color:#555;">
+                    Confidence: {confidence:.1%}
+                </p>
+                {f'<p style="margin:0.3rem 0 0 0; color:#888; font-size:0.9rem;">💡 {other_reason}</p>' if is_other else ''}
             </div>
         ''', unsafe_allow_html=True)
         
+        # Confidence meter
         st.progress(min(confidence, 1.0))
         
-        # Detailed Analysis
+        # Detailed analysis
         with st.expander("📊 Detailed Analysis", expanded=True):
             st.write("**Category Scores:**")
+            
             sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
             
-            max_score = max(scores.values()) if scores.values() else 1
             for category, score in sorted_scores:
-                bar_width = score / max_score if max_score > 0 else 0
-                icon = CATEGORIES.get(category, {}).get("icon", "📄")
-                st.write(f"{icon} **{category}**: {score} matches")
-                st.progress(bar_width)
+                if score > 0:
+                    max_score = max(scores.values()) if max(scores.values()) > 0 else 1
+                    bar_width = min(score / max_score * 100, 100)
+                    icon = CATEGORIES.get(category, {}).get("icon", "📄")
+                    st.write(f"{icon} **{category}**: {score} matches")
+                    st.progress(bar_width / 100)
+            
+            if is_other:
+                st.warning(f"⚠️ **Document classified as 'Other'**")
+                st.info(f"Reason: {other_reason}")
             
             st.write("**Keywords Found:**")
+            found_any = False
             for category, keywords in matched_keywords.items():
                 if keywords:
-                    st.write(f"**{category}:** {', '.join(keywords)}")
+                    found_any = True
+                    # Show keywords with chips
+                    keywords_html = ' '.join([f'<span class="category-chip">{k}</span>' for k in keywords[:10]])
+                    st.markdown(f"**{category}:** {keywords_html}", unsafe_allow_html=True)
             
-            # Debug Information
-            if debug_mode:
-                st.subheader("🐞 Debug Information")
-                
-                st.write("**Detailed Keyword Matches:**")
-                for category, matches in all_matches.items():
-                    if matches:
-                        st.write(f"**{category}:**")
-                        for keyword, count in matches.items():
-                            st.write(f"  - '{keyword}': {count} time(s)")
-                
-                st.write("**Text Sample (first 500 chars):**")
-                st.code(text[:500], language='text')
-                
-                from collections import Counter
-                words = re.findall(r'\b[a-zA-Z]{3,}\b', text.lower())
-                word_freq = Counter(words).most_common(20)
-                st.write("**Most Common Words:**")
-                for word, count in word_freq:
-                    st.write(f"  - '{word}': {count}")
-
+            if not found_any:
+                st.write("No keywords matched")
+            
+            code_patterns = re.findall(r'\b(import|def|class|function|return|print|if|else|for|while|try|except)\b', text.lower())
+            if code_patterns:
+                st.info(f"💻 **Code detected!** Found these patterns: {', '.join(set(code_patterns[:10]))}")
+            
+            st.write("**Document Statistics:**")
+            words = text.split()
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Words", len(words))
+            with col2:
+                st.metric("Unique Words", len(set(words)))
+            with col3:
+                st.metric("Avg Word Length", f"{sum(len(w) for w in words) / len(words) if words else 0:.1f}")
 else:
-    st.info("👆 Upload a .txt or .pdf file to begin classification")
+    st.info("👆 Upload a .txt file to begin classification")
+    st.caption("Supported categories: Email, Invoice, Report, Resume, Contract, Code")
+    st.caption("Documents that don't match any category will be marked as 'Other'")
 
 st.divider()
 st.caption("Built with Transformers • Powered by DistilBERT")
