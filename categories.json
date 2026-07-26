@@ -1,209 +1,161 @@
 {
   "Email": {
     "keywords": [
-      "dear", "hello", "hi", "hey", "greetings", "regards", "sincerely", 
-      "thanks", "thank you", "appreciate", "email", "sent", "received", 
-      "subject", "reply", "respond", "forward", "cc", "bcc", "attachment", 
+      "dear", "hello", "hi", "hey", "greetings", "regards", "sincerely",
+      "thanks", "thank you", "appreciate", "email", "sent", "received",
+      "subject", "reply", "respond", "forward", "cc", "bcc", "attachment",
       "attach", "best regards", "kind regards", "warm regards", "yours truly",
       "looking forward", "hope this finds you", "per my last email",
       "as per my previous", "following up", "follow up"
     ],
     "weight": 1.0,
-    "description": "A message sent electronically between individuals, often containing greetings, requests, updates, or attachments.",
+    "description": "Electronic messages between individuals containing greetings, requests, or updates.",
     "icon": "📧",
     "color": "#2196F3",
-    "threshold": 3,
-    "examples": ["job application email", "business correspondence", "personal message"]
+    "threshold": 3
   },
-
   "Invoice": {
     "keywords": [
-      "invoice", "invoicing", "invoiced", "payment", "pay", "paid", "amount", 
-      "due", "overdue", "total", "subtotal", "balance", "receipt", "receipts",
-      "billing", "bill", "purchase", "purchased", "order", "orders", 
-      "tax", "taxes", "discount", "discounted", "price", "pricing", "cost", 
-      "costs", "outstanding", "statement", "transaction", "transactions",
+      "invoice", "invoicing", "invoiced", "payment", "pay", "paid", "amount",
+      "due", "overdue", "total", "subtotal", "balance", "receipt",
+      "billing", "bill", "purchase", "order", "tax", "discount",
+      "price", "cost", "outstanding", "statement", "transaction",
       "payable", "receivable", "credit", "debit", "charge", "fee"
     ],
     "weight": 1.2,
-    "description": "A financial document requesting payment for goods or services, usually containing totals, taxes, and due dates.",
+    "description": "Financial document requesting payment for goods or services.",
     "icon": "📄",
     "color": "#FF9800",
-    "threshold": 4,
-    "examples": ["sales invoice", "purchase invoice", "billing statement"]
+    "threshold": 4
   },
-
   "Report": {
     "keywords": [
-      "report", "reports", "reported", "analysis", "analyze", "analytics",
-      "summary", "summarize", "findings", "find", "results", "data", 
-      "conclusion", "conclude", "recommendation", "recommend", "performance", 
-      "metrics", "kpi", "dashboard", "trend", "trends", "forecast", 
-      "forecasted", "evaluation", "evaluate", "assessment", "assess",
-      "insights", "insight", "overview", "executive summary"
+      "report", "reports", "analysis", "analyze", "analytics",
+      "summary", "summarize", "findings", "results", "data",
+      "conclusion", "recommendation", "performance", "metrics", "kpi",
+      "dashboard", "trend", "forecast", "evaluation", "assessment",
+      "insights", "overview", "executive summary"
     ],
     "weight": 1.0,
-    "description": "A structured document presenting analysis, findings, data summaries, and recommendations.",
+    "description": "Structured document presenting analysis, findings, and recommendations.",
     "icon": "📋",
     "color": "#9C27B0",
-    "threshold": 4,
-    "examples": ["business report", "project report", "analytical report"]
+    "threshold": 4
   },
-
   "Resume": {
     "keywords": [
-      "experience", "experienced", "skills", "skill", "education", "educated",
-      "job", "work", "career", "position", "positions", "accomplishments",
-      "accomplished", "professional", "certification", "certified",
-      "degree", "degrees", "university", "college", "employment",
-      "employer", "responsibilities", "responsible", "achievements",
-      "achieved", "references", "objective", "summary", "qualifications",
-      "qualified", "expertise", "proficient", "leadership", "managed",
-      "developed", "created", "implemented", "designed", "led", "coordinated"
+      "experience", "experiences", "skills", "education", "job", "work",
+      "career", "position", "accomplishments", "professional",
+      "certification", "degree", "university", "college", "employment",
+      "responsibilities", "achievements", "references", "objective",
+      "qualifications", "expertise", "proficient", "leadership",
+      "managed", "developed", "created", "implemented", "designed",
+      "led", "coordinated", "project", "team", "manager", "engineer",
+      "developer", "analyst", "senior", "junior", "intern", "volunteer"
     ],
     "weight": 1.3,
-    "description": "A professional document summarizing a person's work experience, skills, education, and achievements.",
+    "description": "Professional document summarizing work experience, skills, and education.",
     "icon": "📝",
     "color": "#4CAF50",
-    "threshold": 5,
-    "examples": ["CV", "resume", "job application"]
+    "threshold": 4
   },
-
   "Contract": {
     "keywords": [
-      "agreement", "agree", "terms", "term", "conditions", "condition",
-      "party", "parties", "clause", "clauses", "effective", "effectiveness",
-      "signature", "sign", "signed", "legal", "legally", "obligation",
-      "obligations", "liability", "liabilities", "indemnify", "indemnification",
-      "warranty", "warranties", "termination", "terminate", "confidential",
-      "confidentiality", "governing", "jurisdiction", "arbitration",
-      "force majeure", "non-disclosure", "disclosure", "representations",
-      "warranties", "covenant", "breach", "default", "remedy", "damages"
+      "agreement", "terms", "conditions", "party", "clause",
+      "effective", "signature", "legal", "obligation", "liability",
+      "indemnify", "warranty", "termination", "confidential",
+      "governing", "jurisdiction", "arbitration", "force majeure",
+      "non-disclosure", "representations", "covenant", "breach",
+      "default", "remedy", "damages"
     ],
     "weight": 1.4,
-    "description": "A legally binding agreement outlining obligations, terms, conditions, and responsibilities between parties.",
+    "description": "Legally binding agreement outlining obligations and responsibilities.",
     "icon": "📑",
     "color": "#F44336",
-    "threshold": 5,
-    "examples": ["NDA", "service agreement", "employment contract"]
+    "threshold": 5
   },
-
-  "Code": {
-    "keywords": [
-      "import", "from", "def", "def ", "class", "class ", "function", 
-      "return", "print", "if", "else", "elif", "for", "while", "loop",
-      "try", "except", "finally", "with", "as", "lambda", "async", 
-      "await", "yield", "global", "nonlocal", "assert", "pass", 
-      "break", "continue", "raise", "self", "super", "init", "init ",
-      "true", "false", "none", "null", "undefined", "var", "let", 
-      "const", "console.log", "system.out", "public", "private", 
-      "protected", "static", "void", "int", "string", "boolean",
-      "array", "list", "dict", "tuple", "set", "object"
-    ],
-    "weight": 1.5,
-    "description": "Programming source code containing functions, classes, logic, and syntax from various programming languages.",
-    "icon": "💻",
-    "color": "#607D8B",
-    "threshold": 5,
-    "examples": ["Python code", "JavaScript code", "Java code"]
-  },
-
   "Academic Paper": {
     "keywords": [
-      "abstract", "introduction", "methodology", "methods", "results", 
+      "abstract", "introduction", "methodology", "methods", "results",
       "findings", "discussion", "conclusion", "references", "citations",
-      "cited", "bibliography", "literature", "review", "research", 
-      "study", "studies", "experiment", "experimental", "hypothesis",
-      "theoretical", "framework", "analysis", "data", "sample", 
-      "participants", "survey", "questionnaire", "statistical", 
-      "significant", "p-value", "correlation", "regression"
+      "bibliography", "literature", "review", "research", "study",
+      "experiment", "hypothesis", "theoretical", "framework",
+      "analysis", "sample", "participants", "survey", "questionnaire",
+      "statistical", "significant", "p-value", "correlation"
     ],
     "weight": 1.2,
-    "description": "An academic or scientific paper containing research, methodology, results, and citations.",
+    "description": "Academic or scientific paper with research methodology and citations.",
     "icon": "📚",
     "color": "#5C6BC0",
-    "threshold": 4,
-    "examples": ["research paper", "thesis", "dissertation"]
+    "threshold": 4
   },
-
   "Financial Statement": {
     "keywords": [
-      "financial", "statement", "statements", "balance sheet", "income", 
-      "profit", "profit", "loss", "revenue", "revenues", "expense", 
-      "expenses", "cash flow", "cashflow", "investment", "investments",
+      "financial", "statement", "balance sheet", "income", "profit",
+      "loss", "revenue", "expense", "cash flow", "investment",
       "shareholder", "equity", "assets", "liabilities", "depreciation",
       "amortization", "earnings", "ebitda", "gross", "net", "operating",
       "financing", "investing", "dividend", "retained earnings"
     ],
     "weight": 1.2,
-    "description": "A formal record of financial activities, including income, expenses, and financial position.",
+    "description": "Formal record of financial activities and position.",
     "icon": "💰",
     "color": "#00897B",
-    "threshold": 4,
-    "examples": ["balance sheet", "income statement", "cash flow statement"]
+    "threshold": 4
   },
-
   "Meeting Notes": {
     "keywords": [
-      "meeting", "minutes", "attendees", "attend", "agenda", "discussion",
-      "discussed", "action items", "actions", "follow-up", "followup",
-      "decision", "decisions", "notes", "summary", "recap", "review",
-      "present", "absent", "apologies", "next steps", "deadline",
-      "assigned", "responsible", "task", "tasks", "update"
+      "meeting", "minutes", "attendees", "agenda", "discussion",
+      "action items", "follow-up", "decision", "notes", "summary",
+      "recap", "review", "present", "absent", "apologies",
+      "next steps", "deadline", "assigned", "responsible", "task"
     ],
     "weight": 1.0,
-    "description": "Notes and minutes from a meeting, including discussion points, decisions, and action items.",
+    "description": "Meeting minutes and notes with discussion points and action items.",
     "icon": "📝",
     "color": "#F57C00",
-    "threshold": 3,
-    "examples": ["team meeting notes", "board minutes", "project meeting"]
+    "threshold": 3
   },
-
   "Legal Document": {
     "keywords": [
-      "legal", "court", "judgment", "judgement", "lawsuit", "attorney",
-      "lawyer", "plaintiff", "defendant", "appeal", "motion", "hearing",
-      "trial", "verdict", "settlement", "mediation", "arbitration",
-      "statute", "regulation", "ordinance", "compliance", "regulatory",
-      "enforcement", "penalty", "fine", "sanction", "prosecution"
+      "legal", "court", "judgment", "lawsuit", "attorney",
+      "lawyer", "plaintiff", "defendant", "appeal", "motion",
+      "hearing", "trial", "verdict", "settlement", "mediation",
+      "arbitration", "statute", "regulation", "compliance",
+      "enforcement", "penalty", "fine", "sanction"
     ],
     "weight": 1.3,
-    "description": "A legal document related to court proceedings, laws, regulations, or legal compliance.",
+    "description": "Legal document related to court proceedings or legal compliance.",
     "icon": "⚖️",
     "color": "#7B1FA2",
-    "threshold": 4,
-    "examples": ["court filing", "legal brief", "regulation"]
+    "threshold": 4
   },
-
   "News Article": {
     "keywords": [
-      "breaking", "headline", "headlines", "reporter", "source", "sources",
-      "statement", "announcement", "announced", "update", "updates",
-      "coverage", "journalist", "editorial", "opinion", "analysis",
-      "investigation", "investigative", "exclusive", "interview",
-      "quoted", "according to", "reported", "publish", "published"
+      "breaking", "headline", "reporter", "source", "statement",
+      "announcement", "update", "coverage", "journalist",
+      "editorial", "opinion", "analysis", "investigation",
+      "exclusive", "interview", "quoted", "according to",
+      "reported", "publish"
     ],
     "weight": 1.0,
-    "description": "A news article reporting on current events, announcements, or investigative journalism.",
+    "description": "News article reporting on current events or investigative journalism.",
     "icon": "📰",
     "color": "#FF6F00",
-    "threshold": 3,
-    "examples": ["news report", "feature article", "breaking news"]
+    "threshold": 3
   },
-
   "Presentation": {
     "keywords": [
-      "slide", "slides", "presentation", "agenda", "overview", "highlight",
-      "highlights", "key points", "summary", "conclusion", "next steps",
-      "objectives", "goal", "goals", "vision", "mission", "strategy",
-      "strategic", "roadmap", "timeline", "milestone", "milestones",
-      "speaker", "presenter", "audience", "q&a", "questions"
+      "slide", "slides", "presentation", "agenda", "overview",
+      "highlight", "key points", "summary", "conclusion",
+      "next steps", "objectives", "goal", "vision", "mission",
+      "strategy", "roadmap", "timeline", "milestone",
+      "speaker", "presenter", "audience"
     ],
     "weight": 1.0,
-    "description": "A presentation document with slides, agenda, highlights, and key points for an audience.",
+    "description": "Presentation document with slides, agenda, and key points.",
     "icon": "📊",
     "color": "#D32F2F",
-    "threshold": 3,
-    "examples": ["business presentation", "sales deck", "project proposal"]
+    "threshold": 3
   }
 }

@@ -1,63 +1,81 @@
-/* styles.css - Custom CSS for Document Classifier */
-
+/* ============================================
+   MAIN STYLES
+   ============================================ */
 .main {
     padding: 2rem;
 }
 
-/* Button styling */
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
 .stButton > button {
     width: 100%;
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-weight: bold;
     transition: all 0.3s ease;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .stButton > button:hover {
-    background-color: #45a049;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Upload box styling */
+.stButton > button:active {
+    transform: translateY(0px);
+}
+
+/* ============================================
+   UPLOAD BOX
+   ============================================ */
 .upload-box {
-    border: 2px dashed #4CAF50;
-    border-radius: 10px;
-    padding: 2rem;
+    border: 2px dashed #667eea;
+    border-radius: 12px;
+    padding: 2.5rem;
     text-align: center;
-    background-color: #f9f9f9;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%);
     transition: all 0.3s ease;
 }
 
 .upload-box:hover {
-    background-color: #f0f8f0;
-    border-color: #45a049;
+    border-color: #764ba2;
+    background: linear-gradient(135deg, #f0f1ff 0%, #e8e9ff 100%);
+    transform: scale(1.01);
 }
 
-/* Result box styling */
+/* ============================================
+   RESULT BOXES
+   ============================================ */
 .result-box {
     padding: 1.5rem;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-top: 1rem;
     animation: fadeIn 0.5s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .result-success {
-    background-color: #e8f5e9;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
     border-left: 5px solid #4CAF50;
 }
 
 .result-warning {
-    background-color: #fff3e0;
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
     border-left: 5px solid #FF9800;
 }
 
 .result-other {
-    background-color: #f5f5f5;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
     border-left: 5px solid #9E9E9E;
 }
 
-/* Preview box styling */
+/* ============================================
+   PREVIEW BOX
+   ============================================ */
 .preview-box {
     background-color: #f5f5f5;
     padding: 1rem;
@@ -68,9 +86,9 @@
     font-family: 'Courier New', monospace;
     font-size: 0.9rem;
     border: 1px solid #e0e0e0;
+    line-height: 1.6;
 }
 
-/* Scrollbar styling for preview */
 .preview-box::-webkit-scrollbar {
     width: 8px;
 }
@@ -89,21 +107,9 @@
     background: #555;
 }
 
-/* Progress bar styling */
-.stProgress > div > div {
-    background-color: #4CAF50 !important;
-}
-
-/* Metric styling */
-.metric-container {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-    border: 1px solid #e0e0e0;
-}
-
-/* Category chip styling */
+/* ============================================
+   CATEGORY CHIPS
+   ============================================ */
 .category-chip {
     display: inline-block;
     padding: 0.3rem 0.8rem;
@@ -111,10 +117,46 @@
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
-    border: 1px solid #ddd;
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+    transition: all 0.3s ease;
+    cursor: default;
 }
 
-/* Animations */
+.category-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ============================================
+   METRIC CARDS
+   ============================================ */
+.metric-container {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.metric-container:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   SIDEBAR IMPROVEMENTS
+   ============================================ */
+.css-1d391kg {
+    background: linear-gradient(180deg, #f8f9ff 0%, #f0f1ff 100%);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -127,64 +169,14 @@
 }
 
 @keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
-/* Status indicators */
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.status-success {
-    background-color: #c8e6c9;
-    color: #2e7d32;
-}
-
-.status-warning {
-    background-color: #ffe0b2;
-    color: #e65100;
-}
-
-.status-other {
-    background-color: #e0e0e0;
-    color: #616161;
-}
-
-/* Tooltip styling */
-.tooltip {
-    position: relative;
-    display: inline-block;
-    cursor: help;
-}
-
-.tooltip:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    background-color: #333;
-    color: white;
-    padding: 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    z-index: 1000;
-}
-
-/* Responsive design */
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 @media (max-width: 768px) {
     .main {
         padding: 1rem;
@@ -195,19 +187,17 @@
     }
     
     .upload-box {
-        padding: 1rem;
+        padding: 1.5rem;
     }
 }
 
-/* Dark mode support */
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
 @media (prefers-color-scheme: dark) {
     .upload-box {
-        background-color: #2d2d2d;
-        border-color: #4CAF50;
-    }
-    
-    .upload-box:hover {
-        background-color: #3d3d3d;
+        background: linear-gradient(135deg, #2d2d3d 0%, #252535 100%);
+        border-color: #667eea;
     }
     
     .preview-box {
@@ -217,8 +207,30 @@
     }
     
     .metric-container {
-        background-color: #2d2d2d;
+        background: #2d2d2d;
         border-color: #444;
         color: #e0e0e0;
     }
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+.stProgress > div > div {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 8px;
+}
+
+/* ============================================
+   EXPANDER
+   ============================================ */
+.streamlit-expanderHeader {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%);
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-weight: 600;
+}
+
+.streamlit-expanderHeader:hover {
+    background: linear-gradient(135deg, #f0f1ff 0%, #e8e9ff 100%);
 }
